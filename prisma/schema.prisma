@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  name          String?    
+  email         String     @unique
+  image         String?    
+  emailVerified DateTime?  
+  accounts      Account[]  
+  properties    Property[] 
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Account {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  provider          String
+  providerAccountId String
+  refreshToken      String?   
+  accessToken       String?
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String?
+  sessionState      String?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Property {
+  id            Int           @id @default(autoincrement())
+  title         String
+  city          String
+  pincode       String
+  price         Float
+  address       String
+  contact       String
+  propertyType  PropertyType
+  description   String?
+  images        String[]      
+  country       String
+  listingDate   DateTime      @default(now())
+  sharing       SharingType   
+  owner         User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId       Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([city, pincode]) 
+}
+
+enum PropertyType {
+  PAYING_GUEST
+  HOSTEL
+}
+
+enum SharingType {
+  SINGLE
+  DOUBLE
+  TRIPLE
+}
